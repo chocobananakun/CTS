@@ -4,7 +4,9 @@ const http = require("http").createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(http, {
   cors: {
-    origin: "*"
+    origin: "*", // ここを明示する
+    methods: ["GET", "POST"],
+    credentials: false
   }
 });
 
@@ -12,7 +14,6 @@ let messages = [];
 
 app.use(express.json());
 
-// RESTエンドポイント
 app.get("/messages", (req, res) => {
   res.json(messages);
 });
@@ -24,16 +25,10 @@ app.post("/send", (req, res) => {
   res.sendStatus(200);
 });
 
-// WebSocket通信
 io.on("connection", socket => {
-  console.log("A user connected");
   socket.emit("init", messages);
-  socket.on("disconnect", () => {
-    console.log("A user disconnected");
-  });
 });
 
-// RenderでPORTが環境変数になる
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
